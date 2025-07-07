@@ -1,0 +1,6 @@
+#request
+# No parameters needed
+---
+#response
+bool success
+float32 cruise_speed  # unit: m/s

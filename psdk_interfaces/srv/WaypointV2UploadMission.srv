@@ -1,0 +1,5 @@
+#request
+WaypointV2MissionSettings mission_settings
+---
+#response
+bool success

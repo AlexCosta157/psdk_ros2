@@ -1,0 +1,5 @@
+#request
+# No parameters needed
+---
+#response
+bool success

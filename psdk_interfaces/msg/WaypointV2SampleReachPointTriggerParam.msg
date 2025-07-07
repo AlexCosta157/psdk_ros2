@@ -1,0 +1,2 @@
+uint16 waypoint_index
+uint16 terminate_num

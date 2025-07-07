@@ -1,0 +1,3 @@
+uint16 action_id
+WaypointV2Trigger trigger
+WaypointV2Actuator actuator

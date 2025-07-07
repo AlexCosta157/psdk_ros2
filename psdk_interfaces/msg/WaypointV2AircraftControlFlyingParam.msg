@@ -1,0 +1,1 @@
+uint8 is_start_flying       # 0: stop flying, 1: start flying

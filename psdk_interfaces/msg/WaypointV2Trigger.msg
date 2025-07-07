@@ -1,0 +1,6 @@
+uint8 action_trigger_type  # see E_DJIWaypointV2ActionTriggerType
+# Union data - only one will be used based on trigger type
+WaypointV2SampleReachPointTriggerParam sample_reach_point_param
+WaypointV2AssociateTriggerParam associate_param  
+WaypointV2TrajectoryTriggerParam trajectory_param
+WaypointV2IntervalTriggerParam interval_param

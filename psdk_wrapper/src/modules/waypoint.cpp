@@ -9,7 +9,7 @@
  *
  */
 
-#include "psdk_wrapper/modules/waypoint_v2.hpp"
+#include "psdk_wrapper/modules/waypoint.hpp"
 
 namespace psdk_ros2
 {

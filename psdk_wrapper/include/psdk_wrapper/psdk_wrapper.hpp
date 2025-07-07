@@ -268,7 +268,7 @@ class PSDKWrapper : public rclcpp_lifecycle::LifecycleNode
   std::shared_ptr<GimbalModule> gimbal_module_;
   std::shared_ptr<HmsModule> hms_module_;
   std::shared_ptr<PerceptionModule> perception_module_;
-  std::shared_ptr<WaypointModule> waypoint_module_;
+  std::shared_ptr<WaypointV2Module> waypoint_module_;
 
   std::unique_ptr<utils::NodeThread> flight_control_thread_;
   std::unique_ptr<utils::NodeThread> telemetry_thread_;

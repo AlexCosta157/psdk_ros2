@@ -57,6 +57,7 @@ GimbalModule::on_configure(const rclcpp_lifecycle::State &state)
       qos_profile_);
   return CallbackReturn::SUCCESS;
 }
+
 GimbalModule::CallbackReturn
 GimbalModule::on_activate(const rclcpp_lifecycle::State &state)
 {

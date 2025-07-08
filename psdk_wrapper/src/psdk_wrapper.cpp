@@ -100,6 +100,7 @@ PSDKWrapper::PSDKWrapper(const std::string &node_name)
                 is_perception_module_mandatory_);
   get_parameter("mandatory_modules.waypoint_v2", is_waypoint_v2_module_mandatory_);
 
+  try {
   create_module(is_telemetry_module_mandatory_, telemetry_module_,
                 telemetry_thread_, "telemetry_node",
                 psdk_ros2::global_telemetry_ptr_);
@@ -119,6 +120,10 @@ PSDKWrapper::PSDKWrapper(const std::string &node_name)
                 psdk_ros2::global_perception_ptr_);
   create_module(is_waypoint_v2_module_mandatory_, waypoint_v2_module_,
               waypoint_v2_thread_, "waypoint_v2_node");
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(get_logger(), "Failed to create modules: %s", e.what());
+    throw;
+  }
 }
 
 PSDKWrapper::~PSDKWrapper()
@@ -470,14 +475,21 @@ PSDKWrapper::stop_and_destroy_module(
 }
 
 template <typename ModuleType>
-bool
-PSDKWrapper::initialize_module(bool is_mandatory,
+bool PSDKWrapper::initialize_module(bool is_mandatory,
                                std::shared_ptr<ModuleType> &module_ptr)
 {
-  if (is_mandatory && module_ptr)
-  {
-    auto init_func = std::bind(&ModuleType::init, module_ptr);
-    return init_func();
+  if (is_mandatory) {
+    if (!module_ptr) {
+      RCLCPP_ERROR(get_logger(), "Module pointer is null but module is mandatory");
+      return false;
+    }
+    try {
+      auto init_func = std::bind(&ModuleType::init, module_ptr);
+      return init_func();
+    } catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Exception during module init: %s", e.what());
+      return false;
+    }
   }
   return true;
 }
@@ -698,17 +710,22 @@ PSDKWrapper::init(T_DjiUserInfo *user_info)
   return true;
 }
 
-bool
-PSDKWrapper::initialize_psdk_modules()
+bool PSDKWrapper::initialize_psdk_modules()
 {
-  if (!initialize_module(is_telemetry_module_mandatory_, telemetry_module_) ||
-      !initialize_module(is_camera_module_mandatory_, camera_module_) ||
-      !initialize_module(is_gimbal_module_mandatory_, gimbal_module_) ||
-      !initialize_module(is_liveview_module_mandatory_, liveview_module_) ||
-      !initialize_module(is_hms_module_mandatory_, hms_module_) ||
-      !initialize_module(is_perception_module_mandatory_, perception_module_) ||
-      !initialize_module(is_waypoint_v2_module_mandatory_, waypoint_v2_module_))
-  {
+  try {
+    if (!initialize_module(is_telemetry_module_mandatory_, telemetry_module_) ||
+        !initialize_module(is_camera_module_mandatory_, camera_module_) ||
+        !initialize_module(is_gimbal_module_mandatory_, gimbal_module_) ||
+        !initialize_module(is_liveview_module_mandatory_, liveview_module_) ||
+        !initialize_module(is_hms_module_mandatory_, hms_module_) ||
+        !initialize_module(is_perception_module_mandatory_, perception_module_) ||
+        !initialize_module(is_waypoint_v2_module_mandatory_, waypoint_v2_module_))
+    {
+      RCLCPP_ERROR(get_logger(), "Failed to initialize one or more modules");
+      return false;
+    }
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(get_logger(), "Exception during module initialization: %s", e.what());
     return false;
   }
 

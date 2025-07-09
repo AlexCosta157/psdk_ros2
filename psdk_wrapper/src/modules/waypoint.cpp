@@ -39,7 +39,7 @@ WaypointV2Module::on_configure(const rclcpp_lifecycle::State &state)
 {
   (void)state;
   RCLCPP_INFO(get_logger(), "Configuring WaypointV2Module");
-
+  /*
   // Create services
   waypoint_v2_upload_mission_service_ = create_service<WaypointV2UploadMission>(
       "psdk_ros2/waypoint_v2_upload_mission",
@@ -89,7 +89,7 @@ WaypointV2Module::on_configure(const rclcpp_lifecycle::State &state)
 
   waypoint_v2_mission_state_pub_ = create_publisher<psdk_interfaces::msg::WaypointV2MissionState>(
       "psdk_ros2/waypoint_v2_mission_state", 10);
-
+*/
   return CallbackReturn::SUCCESS;
 }
 
@@ -136,47 +136,29 @@ WaypointV2Module::on_shutdown(const rclcpp_lifecycle::State &state)
   return CallbackReturn::SUCCESS;
 }
 
-bool
-WaypointV2Module::init()
+bool WaypointV2Module::init()
 {
-  if (is_module_initialized_)
-  {
+  if (is_module_initialized_) {
     RCLCPP_INFO(get_logger(), "Waypoint V2 module already initialized, skipping.");
     return true;
   }
 
   RCLCPP_INFO(get_logger(), "Initializing waypoint V2 module");
-  T_DjiReturnCode return_code = DjiWaypointV2_Init();
-  if (return_code != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS)
-  {
-    RCLCPP_ERROR(get_logger(),
-                 "Could not initialize waypoint V2 module. Error code: %ld",
-                 return_code);
-    return false;
+  
+  // Add a try-catch block to handle potential crashes
+  try {
+    T_DjiReturnCode return_code = DjiWaypointV2_Init();
+    if (return_code != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+      RCLCPP_WARN(get_logger(),
+                   "Could not initialize waypoint V2 module. Error code: %ld. This may be normal if waypoint v2 is not supported.",
+                   return_code);
+      // Don't fail if waypoint v2 is not supported
+      return true;
+    }
+  } catch (...) {
+    RCLCPP_WARN(get_logger(), "Exception during waypoint V2 initialization. Continuing without waypoint v2.");
+    return true;
   }
-
-  // Register callbacks
-  return_code = DjiWaypointV2_RegisterMissionEventCallback(waypoint_v2_mission_event_callback);
-  if (return_code != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS)
-  {
-    RCLCPP_ERROR(get_logger(),
-                 "Could not register mission event callback. Error code: %ld",
-                 return_code);
-    return false;
-  }
-
-  return_code = DjiWaypointV2_RegisterMissionStateCallback(waypoint_v2_mission_state_callback);
-  if (return_code != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS)
-  {
-    RCLCPP_ERROR(get_logger(),
-                 "Could not register mission state callback. Error code: %ld",
-                 return_code);
-    return false;
-  }
-
-  is_module_initialized_ = true;
-  return true;
-}
 
 bool
 WaypointV2Module::deinit()

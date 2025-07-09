@@ -39,7 +39,6 @@ WaypointV2Module::on_configure(const rclcpp_lifecycle::State &state)
 {
   (void)state;
   RCLCPP_INFO(get_logger(), "Configuring WaypointV2Module");
-  /*
   // Create services
   waypoint_v2_upload_mission_service_ = create_service<WaypointV2UploadMission>(
       "psdk_ros2/waypoint_v2_upload_mission",
@@ -89,7 +88,7 @@ WaypointV2Module::on_configure(const rclcpp_lifecycle::State &state)
 
   waypoint_v2_mission_state_pub_ = create_publisher<psdk_interfaces::msg::WaypointV2MissionState>(
       "psdk_ros2/waypoint_v2_mission_state", 10);
-*/
+
   return CallbackReturn::SUCCESS;
 }
 

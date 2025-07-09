@@ -24,6 +24,7 @@ std::shared_ptr<psdk_ros2::CameraModule> psdk_ros2::global_camera_ptr_;
 std::shared_ptr<psdk_ros2::LiveviewModule> psdk_ros2::global_liveview_ptr_;
 std::shared_ptr<psdk_ros2::HmsModule> psdk_ros2::global_hms_ptr_;
 std::shared_ptr<psdk_ros2::PerceptionModule> psdk_ros2::global_perception_ptr_;
+std::shared_ptr<psdk_ros2::WaypointV2Module> psdk_ros2::global_waypoint_v2_ptr_;
 
 using namespace std::placeholders;  // NOLINT
 
@@ -54,7 +55,7 @@ PSDKWrapper::PSDKWrapper(const std::string &node_name)
   declare_parameter("mandatory_modules.hms", rclcpp::ParameterValue(true));
   declare_parameter("mandatory_modules.perception",
                     rclcpp::ParameterValue(true));
-  declare_parameter("mandatory_modules.waypoint_v2", rclcpp::ParameterValue(true));
+  declare_parameter("mandatory_modules.waypoint_v2", rclcpp::ParameterValue(false));
   declare_parameter("tf_frame_prefix", rclcpp::ParameterValue(""));
   declare_parameter("imu_frame", rclcpp::ParameterValue("psdk_imu_link"));
   declare_parameter("body_frame", rclcpp::ParameterValue("psdk_base_link"));
@@ -119,7 +120,8 @@ PSDKWrapper::PSDKWrapper(const std::string &node_name)
                 perception_thread_, "perception_node",
                 psdk_ros2::global_perception_ptr_);
   create_module(is_waypoint_v2_module_mandatory_, waypoint_v2_module_,
-              waypoint_v2_thread_, "waypoint_v2_node");
+              waypoint_v2_thread_, "waypoint_v2_node",
+              psdk_ros2::global_waypoint_v2_ptr_);
   } catch (const std::exception& e) {
     RCLCPP_ERROR(get_logger(), "Failed to create modules: %s", e.what());
     throw;
@@ -238,7 +240,9 @@ PSDKWrapper::on_shutdown(const rclcpp_lifecycle::State &state)
        !liveview_module_->deinit()) ||
       (is_hms_module_mandatory_ && hms_module_ && !hms_module_->deinit()) ||
       (is_perception_module_mandatory_ && perception_module_ &&
-       !perception_module_->deinit()))
+       !perception_module_->deinit()) || 
+      (is_waypoint_v2_module_mandatory_ && waypoint_v2_module_ && 
+       !waypoint_v2_module_->deinit()))
   {
     RCLCPP_ERROR(get_logger(), "Failed to deinitialize one or more modules.");
     return CallbackReturn::FAILURE;

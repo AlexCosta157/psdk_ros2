@@ -159,7 +159,7 @@ bool WaypointV2Module::init()
     RCLCPP_WARN(get_logger(), "Exception during waypoint V2 initialization. Continuing without waypoint v2.");
     return true;
   }
-
+}
 bool
 WaypointV2Module::deinit()
 {
